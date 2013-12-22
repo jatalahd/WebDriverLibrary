@@ -3,6 +3,7 @@ Library		WebDriverLibrary
 SuiteSetup	SuiteSetupTasks
 SuiteTeardown	SuiteTeardownTasks
 TestSetup	TestSetupTasks
+TestTeardown	TestTeardownTasks
 
 
 *** Variables ***
@@ -19,9 +20,12 @@ SuiteTeardownTasks
 	CloseBrowser
 
 TestSetupTasks
-	SetFindElementTimeout		30
+	SetFindElementTimeout		15
 	SetWaitAfterAction		0
 	ClearBrowserData
+
+TestTeardownTasks
+	RunKeywordIfTestFailed		GetPageScreenshot
 
 
 *** Test Cases ***

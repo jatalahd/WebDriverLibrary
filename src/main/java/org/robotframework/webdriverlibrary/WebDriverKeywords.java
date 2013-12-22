@@ -15,6 +15,9 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.Point;
+import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
@@ -23,7 +26,12 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
+import org.apache.commons.io.FileUtils;
+
 import java.lang.reflect.Method;
+import java.text.SimpleDateFormat;
+import java.io.File;
+import java.util.Date;
 
 
 @RobotKeywords
@@ -107,12 +115,29 @@ public class WebDriverKeywords {
         drv.manage().window().setSize(new Dimension(Integer.parseInt(w), Integer.parseInt(h)));
     }
 
+    @RobotKeyword("Gets the top left pixel coordinates of the current browser window.\n\n"
+                   + "Example:\n"
+                   + "| getBrowserWindowLocation |\n")
+    public String getBrowserWindowLocation(final String w, final String h) {
+        return drv.manage().window().getPosition().toString();
+    }
+
     @RobotKeyword("Returns the title of the current web page.\n\n"
                    + "Example:\n"
                    + "| ${pageTitle}= | GetPageTitle |\n")
     public String getPageTitle() throws Exception {
         Thread.sleep(this.waitAfterAction);
         return drv.getTitle();
+    }
+
+    @RobotKeyword("Saves a screenshot of the current web page. "
+                   + "The screenshot files are saved in a folder './scrshots' in a date-format MMddHHmmss.png.\n\n"
+                   + "Example:\n"
+                   + "| GetPageScreenshot |\n")
+    public void getPageScreenshot() throws Exception {
+        File scrFile = ((TakesScreenshot)drv).getScreenshotAs(OutputType.FILE);
+        String fileName = new SimpleDateFormat("MMddHHmmss'.png'").format(new Date());
+        FileUtils.copyFile(scrFile, new File("./scrshots/"+fileName)); 
     }
 
     @RobotKeyword("Executes the javascript snippet given as argument. "
