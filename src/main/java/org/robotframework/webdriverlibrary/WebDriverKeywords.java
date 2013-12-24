@@ -32,6 +32,8 @@ import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.io.File;
 import java.util.Date;
+import java.awt.Robot;
+import java.awt.event.InputEvent;
 
 
 @RobotKeywords
@@ -56,12 +58,12 @@ public class WebDriverKeywords {
     }
 
     @RobotKeyword("Sets a waiting time, which is used to slow down the keyword execution. "
-                   + "When given a value 3 as argument, each action is executed in three second intervals.\n\n"
+                   + "When given a value 3.25 as argument, each action is executed in those intervals.\n\n"
                    + "Example:\n"
                    + "| SetWaitAfterAction | 5 |\n")
     @ArgumentNames({"wait"})
     public void setWaitAfterAction(final String wait) {
-        this.waitAfterAction = Integer.parseInt(wait)*1000;
+        this.waitAfterAction = (int) (Float.parseFloat(wait)*1000.0);
     }
 
     @RobotKeyword("Opens the sepcified browser. Supports firefox, chrome and ie.\n\n"
@@ -115,11 +117,19 @@ public class WebDriverKeywords {
         drv.manage().window().setSize(new Dimension(Integer.parseInt(w), Integer.parseInt(h)));
     }
 
-    @RobotKeyword("Gets the top left pixel coordinates of the current browser window.\n\n"
+    @RobotKeyword("Returns the top-left pixel-coordinates of the current browser window.\n\n"
                    + "Example:\n"
-                   + "| getBrowserWindowLocation |\n")
-    public String getBrowserWindowLocation(final String w, final String h) {
+                   + "| GetBrowserWindowLocation |\n")
+    public String getBrowserWindowLocation() {
         return drv.manage().window().getPosition().toString();
+    }
+
+    @RobotKeyword("Moves the top-left corner of the current browser window to the specified coordinates on the screen.\n\n"
+                   + "Example:\n"
+                   + "| SetBrowserWindowLocation | 100 | 100 |\n")
+    @ArgumentNames({"x","y"})
+    public void setBrowserWindowLocation(final String x, final String y) {
+        drv.manage().window().setPosition(new Point(Integer.parseInt(x),Integer.parseInt(y)));
     }
 
     @RobotKeyword("Returns the title of the current web page.\n\n"
@@ -151,6 +161,23 @@ public class WebDriverKeywords {
     public String executeJavascript(final String jScript) throws Exception {
         Thread.sleep(this.waitAfterAction);
         return (String)((JavascriptExecutor) drv).executeScript(jScript);
+    }
+
+    @RobotKeyword("Executes a left mouse button click on the given coordinates. "
+                   + "The top-left corner of the screen in the origin with coordinates x=0 and y=0. "
+                   + "The limiting coordinates are defined by the screen resolution, e.g. x=1960 and y=1080. "
+                   + "Uses the Java AWT Robot class, therefore does not work when the screen is locked. "
+                   + "The idea would be to use SetBrowserWindowLocation 0 0 and then this. "
+                   + "Not a good solution, but sometimes might come in handy. \n\n"
+                   + "Example:\n"
+                   + "| ClickOnCoordinate | 100 | 100 |\n")
+    @ArgumentNames({"x","y"})
+    public void clickOnCoordinate(final String x, final String y) throws Exception {
+            Thread.sleep(this.waitAfterAction);
+            Robot robot = new Robot();
+            robot.mouseMove(Integer.parseInt(x), Integer.parseInt(y));
+            robot.mousePress(InputEvent.BUTTON1_MASK);
+            robot.mouseRelease(InputEvent.BUTTON1_MASK);
     }
 
     @RobotKeyword("Does a left mouse button click on the indicated web element given as argument. "
@@ -394,17 +421,18 @@ public class WebDriverKeywords {
     @RobotKeyword("Simulates a drag and drop measured by pixel-coordinate distance from given element. "
                    + "The keyword uses the specified elementTimeout to wait until the element is visible. "
                    + "NOTE! Uses the webdriver's ActionBuilder class, which might not work on all newest browsers. "
-                   + "Safest choise is to use older versions of Firefox and latest versions of Chrome. "
+                   + "Support depends on Selenium's support of browser native events. "
+                   + "Firefox support is depending on Selenium team, Chrome and IE support comes within the drivers. "
                    + "The element can be located by using its DOM definition via the selectors: "
                    + "id, name, xpath, className, linkText, partialLinkText, tagName or cssSelector.\n\n"
                    + "Examples:\n"
                    + "| dragAndDropBy | id    | someId                  | 200 | 100 |\n"
                    + "| dragAndDropBy | xpath | //element[@id='someId'] | 300 | 0   |\n"
                    + "| dragAndDropBy | name  | myElement               | 10  | 10  |\n")
-    @ArgumentNames({"by","id","xx","yy"})
-    public void dragAndDropBy(String by, String id, String xx, String yy) throws Exception { 
+    @ArgumentNames({"by","id","x","y"})
+    public void dragAndDropBy(String by, String id, String x, String y) throws Exception { 
         WebElement e = getE(ExpectedConditions.visibilityOfElementLocated(getBy(by,id)));
-        new Actions(drv).dragAndDropBy(e, Integer.parseInt(xx), Integer.parseInt(yy)).perform();
+        new Actions(drv).dragAndDropBy(e, Integer.parseInt(x), Integer.parseInt(y)).perform();
     }
 
     @RobotKeyword("Just like a click, but does not release the left mouse button. "
@@ -497,10 +525,10 @@ public class WebDriverKeywords {
                    + "| ClickOffsetOnElement | id    | someId                  | 200 | 100 |\n"
                    + "| ClickOffsetOnElement | xpath | //element[@id='someId'] | 300 | 0   |\n"
                    + "| ClickOffsetOnElement | name  | myElement               | 10  | 10  |\n")
-    @ArgumentNames({"by","id","xx","yy"})
-    public void clickOffsetOnElement(String by, String id, String xx, String yy) throws Exception { 
+    @ArgumentNames({"by","id","x","y"})
+    public void clickOffsetOnElement(String by, String id, String x, String y) throws Exception { 
         WebElement e = getE(ExpectedConditions.visibilityOfElementLocated(getBy(by,id)));
-        new Actions(drv).moveToElement(e).moveByOffset(Integer.parseInt(xx),Integer.parseInt(yy)).click().perform();
+        new Actions(drv).moveToElement(e).moveByOffset(Integer.parseInt(x),Integer.parseInt(y)).click().perform();
     }
 
 
