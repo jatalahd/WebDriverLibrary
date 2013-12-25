@@ -147,7 +147,8 @@ public class WebDriverKeywords {
     public void getPageScreenshot() throws Exception {
         File scrFile = ((TakesScreenshot)drv).getScreenshotAs(OutputType.FILE);
         String fileName = new SimpleDateFormat("MMddHHmmss'.png'").format(new Date());
-        FileUtils.copyFile(scrFile, new File("./scrshots/"+fileName)); 
+        FileUtils.copyFile(scrFile, new File("./scrshots/"+fileName));
+        System.out.println("*HTML* <img src='./scrshots/"+fileName+"'></img>");
     }
 
     @RobotKeyword("Executes the javascript snippet given as argument. "
