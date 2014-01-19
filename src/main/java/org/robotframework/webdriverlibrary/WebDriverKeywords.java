@@ -25,6 +25,11 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.internal.ElementScrollBehavior;
+import org.openqa.selenium.remote.CapabilityType;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.Capabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
 import org.apache.commons.io.FileUtils;
 
@@ -34,6 +39,8 @@ import java.io.File;
 import java.util.Date;
 import java.awt.Robot;
 import java.awt.event.InputEvent;
+import java.util.Map;
+import java.net.URL;
 
 
 @RobotKeywords
@@ -66,11 +73,31 @@ public class WebDriverKeywords {
         this.waitAfterAction = (int) (Float.parseFloat(wait)*1000.0);
     }
 
-    @RobotKeyword("Opens the sepcified browser. Supports firefox, chrome and ie.\n\n"
+    @RobotKeyword("Opens the sepcified browser. If the optional parameter for remoteUrl is specified, "
+                   + "the browser is opened on the given Selenium remote server. Currently code supports firefox, chrome and ie.\n\n"
                    + "Examples:\n"
-                   + "| OpenBrowser | firefox |\n"
+                   + "| OpenBrowser | firefox | http://ip.ip.ip.ip:4444/wd/hub |\n"
                    + "| OpenBrowser | chrome  |\n"
                    + "| OpenBrowser | ie      |\n")
+    @ArgumentNames({"browser","remoteUrl="})
+    public void openBrowser(final String browser, final String remoteUrl) throws Exception {
+        DesiredCapabilities cap = null;
+        if (browser.equals("ie")) {
+            cap = DesiredCapabilities.internetExplorer();
+        } else if (browser.equals("chrome")) {
+            cap = DesiredCapabilities.chrome();
+        } else {
+            FirefoxProfile prfl = new FirefoxProfile();
+            prfl.setEnableNativeEvents(true);
+            cap = DesiredCapabilities.firefox();
+            cap.setCapability(CapabilityType.ELEMENT_SCROLL_BEHAVIOR, ElementScrollBehavior.BOTTOM);
+            cap.setCapability(FirefoxDriver.PROFILE, prfl);
+        }
+        drv = new RemoteWebDriver(new URL(remoteUrl), cap);
+        drv.get("about:blank");
+    }
+
+    @RobotKeywordOverload
     @ArgumentNames({"browser"})
     public void openBrowser(final String browser) throws Exception {
         if (browser.equals("ie")) {
@@ -80,7 +107,10 @@ public class WebDriverKeywords {
         } else {
             FirefoxProfile prfl = new FirefoxProfile();
             prfl.setEnableNativeEvents(true);
-            drv = new FirefoxDriver(prfl);
+            DesiredCapabilities cap = new DesiredCapabilities();
+            cap.setCapability(CapabilityType.ELEMENT_SCROLL_BEHAVIOR, ElementScrollBehavior.BOTTOM);
+            cap.setCapability(FirefoxDriver.PROFILE, prfl);
+            drv = new FirefoxDriver(cap);
         }
         drv.get("about:blank");
     }
@@ -122,6 +152,17 @@ public class WebDriverKeywords {
                    + "| GetBrowserWindowLocation |\n")
     public String getBrowserWindowLocation() {
         return drv.manage().window().getPosition().toString();
+    }
+
+    @RobotKeyword("Prints the list of current browser capabilities to the log file.\n\n"
+                   + "Example:\n"
+                   + "| PrintCapabilitiesToLog |\n")
+    public void PrintCapabilitiesToLog() {
+        Map<String,?> maps = ((RemoteWebDriver) drv).getCapabilities().asMap();
+        for (String capa : maps.keySet()) {
+            String value = maps.get(capa).toString();  
+            System.out.println(capa + " : " + value);  
+        }
     }
 
     @RobotKeyword("Moves the top-left corner of the current browser window to the specified coordinates on the screen.\n\n"
