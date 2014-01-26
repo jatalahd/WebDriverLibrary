@@ -49,6 +49,7 @@ public class WebDriverKeywords {
     private static WebDriver drv;
     private int elementTimeout = 30;
     private int waitAfterAction = 0;
+    private String mainWindowHandle;
 
     public WebDriverKeywords() {
     }
@@ -95,6 +96,7 @@ public class WebDriverKeywords {
         }
         drv = new RemoteWebDriver(new URL(remoteUrl), cap);
         drv.get("about:blank");
+        mainWindowHandle = drv.getWindowHandle();
     }
 
     @RobotKeywordOverload
@@ -113,6 +115,7 @@ public class WebDriverKeywords {
             drv = new FirefoxDriver(cap);
         }
         drv.get("about:blank");
+        mainWindowHandle = drv.getWindowHandle();
     }
 
     @RobotKeyword("Closes all browsers started by the OpenBrowser keyword.\n\n"
@@ -441,6 +444,24 @@ public class WebDriverKeywords {
                    + "| SwitchToNextWindow |\n")
     public void switchToNextWindow() throws Exception {
         drv = getD(switchToBrowserWindow("window handle", "next index", true));
+    }
+
+    @RobotKeyword("Assuming that the current focus is on some temporary pop-up window, "
+                   + "this keyword can be used for switching focus to the main window, "
+                   + "The main window is defined as the first opened window using the command OpenBrowser. "
+                   + "The optional parameter 'closeOldWindow' can be given to close the pop-up window.\n\n"
+                   + "Examples:\n"
+                   + "| SwitchToMainWindow |\n"
+                   + "| SwitchToMainWindow | closeOldWindow |\n")
+    @ArgumentNames({"oldWindow="})
+    public void switchToMainWindow(final String oldWindow) throws Exception {
+        drv.close();
+        drv = drv.switchTo().window(mainWindowHandle);
+    }
+
+    @RobotKeywordOverload
+    public void switchToMainWindow() throws Exception {
+        drv = drv.switchTo().window(mainWindowHandle);
     }
 
     @RobotKeyword("Simulates a drag and drop from element1 to element2. "
