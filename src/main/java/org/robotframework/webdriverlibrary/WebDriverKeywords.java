@@ -152,7 +152,7 @@ public class WebDriverKeywords {
 
     @RobotKeyword("Returns the top-left pixel-coordinates of the current browser window.\n\n"
                    + "Example:\n"
-                   + "| GetBrowserWindowLocation |\n")
+                   + "| ${location}= | GetBrowserWindowLocation |\n")
     public String getBrowserWindowLocation() {
         return drv.manage().window().getPosition().toString();
     }
@@ -261,11 +261,39 @@ public class WebDriverKeywords {
                    + "id, name, xpath, className, tagName or cssSelector.\n\n"
                    + "Examples:\n"
                    + "| SelectDropdownItem | id    | someId                  | itemText |\n"
-                   + "| SelectDropdownItem | xpath | //element[@id='someId'] | itemText |\n"
+                   + "| SelectDropdownItem | xpath | //select[@id='someId']  | itemText |\n"
                    + "| SelectDropdownItem | name  | myDropdown              | itemText |\n")
     @ArgumentNames({"by","id","text"})
     public void selectDropdownItem(final String by, final String id, final String text) throws Exception {
         new Select(getE(ExpectedConditions.visibilityOfElementLocated(getBy(by,id)))).selectByVisibleText(text);
+    }
+
+    @RobotKeyword("Selects given item or items on the indicated <select multiple> element given as argument. "
+                   + "The selection method is based on the visible text of the selected item(s). "
+                   + "More than one selected items are given as a comma-separated string, item1,item2,item3,etc... "
+                   + "The optional parameter 'deselectAll' can be given if all preselected values need to be cleared before selection. "
+                   + "The keyword uses the specified elementTimeout to wait until the element is visible. "
+                   + "The element can be located by using its DOM definition via the selectors: "
+                   + "id, name, xpath, className, tagName or cssSelector.\n\n"
+                   + "Examples:\n"
+                   + "| SelectFromMultiSelect | id    | someId                  | itemText                |\n"
+                   + "| SelectFromMultiSelect | xpath | //select[@multiple]     | itemText1,itemText2     |\n"
+                   + "| SelectFromMultiSelect | name  | myMultiSelect           | itemText1 | deselectAll |\n")
+    @ArgumentNames({"by","id","texts","deselectAll="})
+    public void selectFromMultiSelect(final String by, final String id, final String texts, final String ds) throws Exception {
+        Select x = new Select(getE(ExpectedConditions.visibilityOfElementLocated(getBy(by,id))));
+        x.deselectAll();
+        for (String s: texts.split(",")) {
+           x.selectByVisibleText(s.trim()); 
+        }
+    }
+
+    @RobotKeywordOverload
+    public void selectFromMultiSelect(final String by, final String id, final String texts) throws Exception {
+        Select x = new Select(getE(ExpectedConditions.visibilityOfElementLocated(getBy(by,id))));
+        for (String s: texts.split(",")) {
+           x.selectByVisibleText(s.trim()); 
+        }
     }
 
     @RobotKeyword("Clicks the checkbox given as argument, if the checkbox is not already checked. "
