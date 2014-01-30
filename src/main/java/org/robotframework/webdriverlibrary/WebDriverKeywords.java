@@ -14,6 +14,7 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.Point;
@@ -50,8 +51,10 @@ public class WebDriverKeywords {
     private int elementTimeout = 30;
     private int waitAfterAction = 0;
     private String mainWindowHandle;
+    private ChromeOptions options;
 
     public WebDriverKeywords() {
+        options = new ChromeOptions();
     }
 
     @RobotKeyword("Sets a timeout value, which is used for waiting elements to become visible on the page. "
@@ -72,6 +75,15 @@ public class WebDriverKeywords {
     @ArgumentNames({"wait"})
     public void setWaitAfterAction(final String wait) {
         this.waitAfterAction = (int) (Float.parseFloat(wait)*1000.0);
+    }
+
+    @RobotKeyword("Adds a specific Chrome start-up option one at a time. Must be used before 'OpenBrowser' keyword.\n\n"
+                   + "Examples:\n"
+                   + "| SetChromeArgument | --start-maximized |\n"
+                   + "| SetChromeArgument | user-data-dir=C:\\Users\\user_name\\AppData\\Local\\Google\\Chrome\\User Data |\n")
+    @ArgumentNames({"optionString"})
+    public void setChromeArgument(final String optionString) {
+        options.addArguments(optionString);
     }
 
     @RobotKeyword("Opens the sepcified browser. If the optional parameter for remoteUrl is specified, "
@@ -105,7 +117,7 @@ public class WebDriverKeywords {
         if (browser.equals("ie")) {
             drv = new InternetExplorerDriver();
         } else if (browser.equals("chrome")) {
-            drv = new ChromeDriver();
+            drv = new ChromeDriver(options);
         } else {
             FirefoxProfile prfl = new FirefoxProfile();
             prfl.setEnableNativeEvents(true);
