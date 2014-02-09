@@ -16,6 +16,7 @@ import org.openqa.selenium.firefox.FirefoxProfile;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.ie.InternetExplorerDriver;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.TakesScreenshot;
@@ -632,6 +633,14 @@ public class WebDriverKeywords {
     public void clickOffsetOnElement(String by, String id, String x, String y) throws Exception { 
         WebElement e = getE(ExpectedConditions.visibilityOfElementLocated(getBy(by,id)));
         new Actions(drv).moveToElement(e).moveByOffset(Integer.parseInt(x),Integer.parseInt(y)).click().perform();
+    }
+
+    @RobotKeyword("Refreshes the current page by pressing F5. "
+                   + "Uses the ActionBuilder class, so might not work in all browser versions!\n\n"
+                   + "Example:\n"
+                   + "| RefreshPage |\n")
+    public void refreshPage() {
+        new Actions(drv).sendKeys(Keys.F5).perform();
     }
 
 
